@@ -1,0 +1,6 @@
+@media (max-width: 480px) {
+    .matches-grid {
+        grid-template-columns: 1fr;
+        width: 100%;
+    }
+}
