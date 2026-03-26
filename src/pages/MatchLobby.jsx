@@ -2,12 +2,26 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import './MatchLobby.css';
+import TeamLogo from '../components/common/TeamLogo';
 
 export default function MatchLobby() {
     const [matches, setMatches] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const TEAM_CODE_MAP = {
+        'Mumbai Indians': 'MI', 'Chennai Super Kings': 'CSK',
+        'Royal Challengers Bengaluru': 'RCB', 'Royal Challengers Bangalore': 'RCB',
+        'Gujarat Titans': 'GT', 'Lucknow Super Giants': 'LSG',
+        'Kolkata Knight Riders': 'KKR', 'Delhi Capitals': 'DC',
+        'Rajasthan Royals': 'RR', 'Sunrisers Hyderabad': 'SRH', 'Punjab Kings': 'PBKS',
+    };
+    const getTeamCode = (name) => {
+        if (!name) return null;
+        if (TEAM_CODE_MAP[name]) return TEAM_CODE_MAP[name];
+        const upper = name.toUpperCase();
+        return ['MI', 'CSK', 'RCB', 'GT', 'LSG', 'KKR', 'DC', 'RR', 'SRH', 'PBKS'].includes(upper) ? upper : null;
+    };
 
     useEffect(() => {
         const fetchMatches = async () => {
@@ -72,7 +86,7 @@ export default function MatchLobby() {
                     <button className="btn btn-primary" onClick={handleLogout}>Logout</button>
                 </div>
             </div>
-            
+
             {matches.length === 0 ? (
                 <div className="glass-panel empty-state">
                     <p>No matches available right now. Check back later!</p>
@@ -81,10 +95,20 @@ export default function MatchLobby() {
                 <div className="matches-grid">
                     {matches.map(match => (
                         <div key={match.id} className="glass-panel match-card">
-                            <div className="match-teams">
-                                <div className="team">{match.team_a}</div>
-                                <div className="vs">VS</div>
-                                <div className="team">{match.team_b}</div>
+                            <div className="match-teams" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem', flex: 1 }}>
+                                    <div style={{ width: 52, height: 52 }}>
+                                        <TeamLogo teamCode={getTeamCode(match.team_a)} />
+                                    </div>
+                                    <span className="team" style={{ textAlign: 'center', fontSize: '0.85rem' }}>{match.team_a}</span>
+                                </div>
+                                <div className="vs" style={{ flexShrink: 0 }}>VS</div>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem', flex: 1 }}>
+                                    <div style={{ width: 52, height: 52 }}>
+                                        <TeamLogo teamCode={getTeamCode(match.team_b)} />
+                                    </div>
+                                    <span className="team" style={{ textAlign: 'center', fontSize: '0.85rem' }}>{match.team_b}</span>
+                                </div>
                             </div>
                             <div className="match-time">
                                 📅 {new Date(match.start_time).toLocaleString(undefined, {
@@ -119,7 +143,7 @@ export default function MatchLobby() {
                                 );
                             })()}
 
-                            <button 
+                            <button
                                 className={`btn btn-primary create-btn ${match.max_entries && match.entry_count >= match.max_entries ? 'btn-disabled' : ''}`}
                                 disabled={match.max_entries && match.entry_count >= match.max_entries}
                                 style={{ marginTop: match.max_entries ? '0' : '1.5rem', opacity: match.max_entries && match.entry_count >= match.max_entries ? 0.5 : 1 }}
@@ -127,7 +151,7 @@ export default function MatchLobby() {
                             >
                                 {match.max_entries && match.entry_count >= match.max_entries ? 'Contest Full' : 'Create Team'}
                             </button>
-                            <button 
+                            <button
                                 className="btn btn-secondary create-btn"
                                 style={{ marginTop: '0.5rem' }}
                                 onClick={() => navigate('/leaderboard/1')}
