@@ -3,18 +3,20 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './TeamBuilder.css'; // Leverage existing glassmorphic grid classes
 
+
 export default function SharedTeam() {
     const { team_id } = useParams();
     const navigate = useNavigate();
     const [teamData, setTeamData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
     useEffect(() => {
         const fetchSharedTeam = async () => {
             try {
                 // Using generic axios securely without auth headers for this public route
-                const response = await axios.get(`http://localhost:3000/teams/${team_id}/share`);
+                const response = await axios.get(`${BASE_URL}/teams/${team_id}/share`);
                 setTeamData(response.data);
             } catch (err) {
                 setError('Team not found or server error.');
@@ -55,7 +57,7 @@ export default function SharedTeam() {
                     </div>
                 </div>
                 <div className="tb-actions" style={{ marginTop: '1rem' }}>
-                    <button 
+                    <button
                         className="btn btn-primary"
                         onClick={() => navigate('/auth')}
                     >

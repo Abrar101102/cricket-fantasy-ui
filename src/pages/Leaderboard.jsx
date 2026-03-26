@@ -22,10 +22,11 @@ export default function Leaderboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [connected, setConnected] = useState(false);
-    
+    const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
     // To track previous ranks for animation
     const prevRanksRef = useRef({});
-    
+
     const currentUserId = getCurrentUserId();
     const userRowRef = useRef(null);
     const hasScrolledRef = useRef(false);
@@ -33,32 +34,32 @@ export default function Leaderboard() {
     useEffect(() => {
         // Fetch initial data
         const fetchInitialLeaderboard = async () => {
-             try {
-                 const response = await api.get(`/leaderboard/${contest_id}`);
-                 setLeaderboard(response.data);
-                 
-                 // Update prevRanks
-                 const ranks = {};
-                 response.data.forEach(item => {
-                     ranks[item.fantasy_team_id] = item.rank;
-                 });
-                 prevRanksRef.current = ranks;
-                 
-             } catch (err) {
-                 if (err.response?.status === 401) {
-                     navigate('/auth');
-                 } else {
-                     setError('Failed to load leaderboard.');
-                 }
-             } finally {
-                 setLoading(false);
-             }
+            try {
+                const response = await api.get(`/leaderboard/${contest_id}`);
+                setLeaderboard(response.data);
+
+                // Update prevRanks
+                const ranks = {};
+                response.data.forEach(item => {
+                    ranks[item.fantasy_team_id] = item.rank;
+                });
+                prevRanksRef.current = ranks;
+
+            } catch (err) {
+                if (err.response?.status === 401) {
+                    navigate('/auth');
+                } else {
+                    setError('Failed to load leaderboard.');
+                }
+            } finally {
+                setLoading(false);
+            }
         };
 
         fetchInitialLeaderboard();
 
         // Connect WebSocket
-        const socket = io('http://localhost:3000'); // Ensure it matches backend URL
+        const socket = io(BASE_URL); // Ensure it matches backend URL
 
         socket.on('connect', () => {
             setConnected(true);
@@ -153,8 +154,8 @@ export default function Leaderboard() {
                                 // Add key that uses points slightly, to force re-render for flash animation
                                 // Actually, changing class triggers animation, but React needs to know it changed.
                                 // We'll use a hack to ensure animation replay by forcing a new key if rank changes
-                                <tr 
-                                    key={`${item.fantasy_team_id}-${item.rank}`} 
+                                <tr
+                                    key={`${item.fantasy_team_id}-${item.rank}`}
                                     className={`${getRowClass(item)} ${item.user_id === currentUserId ? 'glowing-row' : ''}`}
                                     ref={item.user_id === currentUserId ? userRowRef : null}
                                 >
